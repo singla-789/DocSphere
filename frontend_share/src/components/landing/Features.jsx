@@ -1,6 +1,28 @@
+import { ArrowUpCircle, Clock, CreditCard, FileText, Share2, Shield, Wallet } from "lucide-react";
 import React from "react";
 
 const Features = ({features}) => {
+
+
+  const renderIcon = (iconName,iconColor) => {
+    const iconProps = {size:25,className: iconColor};
+    switch(iconName){
+      case 'ArrowUpCircle':
+        return <ArrowUpCircle {...iconProps}/>
+      case 'Shield':
+        return <Shield {...iconProps}/>
+      case 'Share2':
+        return <Share2 {...iconProps}/>
+      case 'CreditCard':
+        return <CreditCard {...iconProps}/>
+      case 'FileText':
+        return <FileText {...iconProps}/>
+      case 'Clock':
+        return <Clock {...iconProps}/>
+    }
+  } 
+
+
   return (
     <div className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,7 +38,23 @@ const Features = ({features}) => {
 
         <div className="mt-16">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Feature cards go here */}
+            {features.map((feature,index) => (
+              <div key = {index} className="pt-5 border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 bg-white">
+                <div className="flow-root bg-gray-50 rounded-lg px-6 pb-8">
+                  <div className="-mt-6">
+                    <div className="inline-flex items-center justify-center p-3 bg-white rounded-md shadow-lg">
+                      {renderIcon(feature.iconName,feature.iconColor)}
+                    </div>
+                    <h3 className="mt-5 tet-lg font-medium text-gray-900 tracking-tight">
+                      {feature.title}
+                    </h3>
+                    <p className="mt-2 text-gray-500 text-base">
+                      {feature.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import React from "react";
 import { assets } from "../../assets/assets";
 
-const HeroSection = () => {
+const HeroSection = ({openSignIn,openSignUp}) => {
   return (
     <div class="landing-page-content ralative ">
       <div className="absolute h-full inset-0 bg-gradient-to-r from-purple-50 to-indigo-50 opacity-80 z-0 pointer-events-none"></div>
@@ -19,10 +19,14 @@ const HeroSection = () => {
             </p>
             <div className="mt-10 max-w-sm mx-auto sm:max-w-none sm:flex sm:justify-center">
               <div className=" space-y-4 sm:space-y-0 sm:mx-auto sm:inline-grid sm:grid-cols-2 sm:gap-5">
-                <button className="flex items-center justify-centerpx-6 py-3 md:px-10 md:py-4text-base md:text-lg font-semibold rounded-md text-white bg-purple-500 hover:bg-purple-600shadow-lg transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
+                <button
+                onClick={() => openSignUp()} 
+                className="flex items-center justify-centerpx-6 py-3 md:px-10 md:py-4text-base md:text-lg font-semibold rounded-md text-white bg-purple-500 hover:bg-purple-600shadow-lg transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
                   Get Started
                 </button>
-                <button className="flex items-center justify-center px-6 py-3 md:px-10 md:py-4 text-base md:text-lg font-semibold rounded-md text-gray-700 bg-white border border-gray-200 shadow-md transition-all duration-300 ease-out hover:bg-gray-50 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
+                <button 
+                onClick={() => openSignIn()}
+                className="flex items-center justify-center px-6 py-3 md:px-10 md:py-4 text-base md:text-lg font-semibold rounded-md text-gray-700 bg-white border border-gray-200 shadow-md transition-all duration-300 ease-out hover:bg-gray-50 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
                   Sign in
                 </button>
               </div>
