@@ -1,8 +1,11 @@
 import React from 'react'
+import DashBoardLayout from '../layout/DashBoardLayout'
 
 const MyFiles = () => {
   return (
-    <div>MyFiles</div>
+    <DashBoardLayout activeMenu="My Files">
+      <div>MyFiles</div>
+    </DashBoardLayout>
   )
 }
 

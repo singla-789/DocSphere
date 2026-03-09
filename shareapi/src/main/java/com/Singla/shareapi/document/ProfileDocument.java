@@ -17,7 +17,6 @@ import java.time.Instant;
 @Builder
 @Document(collection = "profile")
 public class ProfileDocument {
-
     @Id
     private String id;
     private String clerkId;

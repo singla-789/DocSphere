@@ -1,4 +1,11 @@
 import Testimonials from "../components/landing/Testimonials";
+import {
+  LayoutDashboard,
+  Upload,
+  Files,
+  CreditCard,
+  Receipt,
+} from "lucide-react";
 
 export const features = [
   {
@@ -19,29 +26,25 @@ export const features = [
     iconName: "Share2",
     iconColor: "text-purple-500",
     title: "Simple Sharing",
-    description:
-      "Share files with anyone using secure links that you control.",
+    description: "Share files with anyone using secure links that you control.",
   },
   {
     iconName: "CreditCard",
     iconColor: "text-orange-500",
     title: "Flexible Credits",
-    description:
-      "Pay only for what you use with our credit-based system.",
+    description: "Pay only for what you use with our credit-based system.",
   },
   {
     iconName: "FileText",
     iconColor: "text-red-500",
     title: "File Management",
-    description:
-      "Organize, preview, and manage your files from any device.",
+    description: "Organize, preview, and manage your files from any device.",
   },
   {
     iconName: "Clock",
     iconColor: "text-indigo-500",
     title: "Transaction History",
-    description:
-      "Keep track of all your credit purchases and usage.",
+    description: "Keep track of all your credit purchases and usage.",
   },
 ];
 
@@ -54,10 +57,10 @@ export const pricingPlans = [
       "5 file uploads",
       "Basic file sharing",
       "7-day file retention",
-      "Email support"
+      "Email support",
     ],
     cta: "Get Started",
-    highlighted: false
+    highlighted: false,
   },
   {
     name: "Premium",
@@ -68,10 +71,10 @@ export const pricingPlans = [
       "Advanced file sharing",
       "30-day file retention",
       "Priority email support",
-      "File analytics"
+      "File analytics",
     ],
     cta: "Go Premium",
-    highlighted: true
+    highlighted: true,
   },
   {
     name: "Ultimate",
@@ -83,14 +86,14 @@ export const pricingPlans = [
       "Unlimited file retention",
       "24/7 priority support",
       "Advanced analytics",
-      "API access"
+      "API access",
     ],
     cta: "Go Ultimate",
-    highlighted: false
-  }
+    highlighted: false,
+  },
 ];
 
-export const testimonials =  [
+export const testimonials = [
   {
     name: "Sarah Johnson",
     role: "Marketing Director",
@@ -138,3 +141,35 @@ export const testimonials =  [
   },
 ];
 
+export const SIDE_MENU_DATA = [
+  {
+    id: "01",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    path: "/dashboard",
+  },
+  {
+    id: "02",
+    label: "Upload",
+    icon: Upload,
+    path: "/upload",
+  },
+  {
+    id: "03",
+    label: "My Files",
+    icon: Files,
+    path: "/my-files",
+  },
+  {
+    id: "04",
+    label: "Subscription",
+    icon: CreditCard,
+    path: "/subscription",
+  },
+  {
+    id: "05",
+    label: "Transactions",
+    icon: Receipt,
+    path: "/transactions",
+  },
+];

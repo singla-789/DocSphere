@@ -1,8 +1,11 @@
 import React from 'react'
+import DashBoardLayout from '../layout/DashBoardLayout'
 
 const Subscription = () => {
   return (
-    <div>Subscription</div>
+    <DashBoardLayout activeMenu="Subscription">
+      <div>Subscription</div>
+    </DashBoardLayout>
   )
 }
 
