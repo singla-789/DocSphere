@@ -4,8 +4,11 @@ import com.Singla.DocSphereApi.Document.UserCredits;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface UserCreditsRepository extends MongoRepository<UserCredits,String> {
     boolean existsByClerkId(String clerkId);
     void deleteByClerkId(String clerkId);
+    Optional<UserCredits> findByClerkId(String clerkId);
 }

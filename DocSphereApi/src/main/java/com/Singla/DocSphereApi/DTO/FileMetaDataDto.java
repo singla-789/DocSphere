@@ -1,21 +1,17 @@
-package com.Singla.DocSphereApi.Document;
+package com.Singla.DocSphereApi.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
 @Data
-@Document(collection = "files")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FileMetaDataDocument {
-    @Id
+public class FileMetaDataDto {
     private String id;
     private String name;
     private String type;
@@ -24,5 +20,4 @@ public class FileMetaDataDocument {
     private Boolean isPublic;
     private String fileLocation;
     private LocalDateTime uploadedAt;
-
 }
