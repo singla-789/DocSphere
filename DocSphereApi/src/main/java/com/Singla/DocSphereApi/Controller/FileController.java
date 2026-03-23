@@ -24,7 +24,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/files")
 public class FileController {
-
     private final FileMetaDataService fileMetaDataService;
     private final UserCreditsService userCreditsService;
 
