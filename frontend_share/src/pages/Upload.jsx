@@ -1,132 +1,46 @@
-import React, { useContext, useState } from "react";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { FolderOpen } from "lucide-react";
 import DashBoardLayout from "../layout/DashBoardLayout";
-import UploadBox from "../components/UploadBox";
-import { AlertCircle, CheckCircle2, Info } from "lucide-react";
-import axios from "axios";
-import apiEndpoints from "../utils/apiEndPoints";
-import { useAuth } from "@clerk/clerk-react";
-import { UserCreditsContext } from "../context/UserCreditContext";
-
-const MAX_FILES = 5;
+import FileUpload from "../components/FileUpload";
 
 const Upload = () => {
-  const [files, setFiles] = useState([]);
-  const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // "success" | "error" | "info"
-  const { getToken } = useAuth();
-  const { credits, setCredits } = useContext(UserCreditsContext);
+  const navigate = useNavigate();
 
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-
-    if (files.length + selectedFiles.length > MAX_FILES) {
-      setMessage(`You can only upload a maximum of ${MAX_FILES} files at once.`);
-      setMessageType("error");
-      return;
-    }
-
-    setFiles((prev) => [...prev, ...selectedFiles]);
-    setMessage("");
-    setMessageType("");
+  const handleUploaded = () => {
+    navigate("/my-files");
   };
-
-  const handleRemoveFile = (index) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-    setMessage("");
-    setMessageType("");
-  };
-
-  const handleUpload = async () => {
-    if (files.length === 0) {
-      setMessageType("error");
-      setMessage("Please select at least one file to upload.");
-      return;
-    }
-
-    if (files.length > MAX_FILES) {
-      setMessage(`You can only upload a maximum of ${MAX_FILES} files at once.`);
-      setMessageType("error");
-      return;
-    }
-
-    setUploading(true);
-    setMessage("Uploading files…");
-    setMessageType("info");
-
-    const formData = new FormData();
-    files.forEach((file) => formData.append("files", file));
-
-    try {
-      const token = await getToken();
-      const response = await axios.post(apiEndpoints.UPLOAD_FILES, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.data?.remainingCredits !== undefined) {
-        setCredits(response.data.remainingCredits);
-      }
-
-      setMessage("Files uploaded successfully!");
-      setMessageType("success");
-      setFiles([]);
-    } catch (error) {
-      console.error("Error uploading files:", error);
-      setMessage(
-        error.response?.data?.message || "Error uploading files. Please try again."
-      );
-      setMessageType("error");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  // Fixed: was referencing undefined `isUploadingDisabled`
-  const isUploadDisabled =
-    files.length === 0 ||
-    files.length > MAX_FILES ||
-    credits <= 0 ||
-    files.length > credits;
-
-  // Message banner config
-  const bannerConfig = {
-    error:   { bg: "bg-red-50",   border: "border-red-200",   text: "text-red-700",   icon: <AlertCircle size={17} className="flex-shrink-0" /> },
-    success: { bg: "bg-green-50", border: "border-green-200", text: "text-green-700", icon: <CheckCircle2 size={17} className="flex-shrink-0" /> },
-    info:    { bg: "bg-blue-50",  border: "border-blue-200",  text: "text-blue-700",  icon: <Info size={17} className="flex-shrink-0" /> },
-  };
-  const banner = bannerConfig[messageType];
 
   return (
     <DashBoardLayout activeMenu="Upload">
-      <div className="p-6 max-w-2xl mx-auto">
+      <div className="max-w-3xl mx-auto px-4 py-8">
 
-        {/* ── Message banner ── */}
-        {message && banner && (
-          <div
-            className={`
-              mb-5 px-4 py-3 rounded-xl border flex items-center gap-2.5
-              text-sm font-medium
-              ${banner.bg} ${banner.border} ${banner.text}
-            `}
-          >
-            {banner.icon}
-            <span>{message}</span>
+        {/* ── Page header ── */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-8">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600 border border-indigo-100 mb-3">
+              <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+              Quick upload
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+              Upload Files
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Drag & drop or browse — files are stored securely in your vault.
+            </p>
           </div>
-        )}
 
-        <UploadBox
-          files={files}
-          onFileChange={handleFileChange}
-          onUpload={handleUpload}
-          uploading={uploading}
-          onRemoveFile={handleRemoveFile}
-          remainingCredits={credits}
-          isUploadDisabled={isUploadDisabled}
-          maxFiles={MAX_FILES}
-        />
+          <Link
+            to="/my-files"
+            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition self-start sm:self-auto"
+          >
+            <FolderOpen className="h-4 w-4" />
+            My Files
+          </Link>
+        </div>
+
+        {/* ── Upload widget ── */}
+        <FileUpload onUploaded={handleUploaded} />
       </div>
     </DashBoardLayout>
   );
