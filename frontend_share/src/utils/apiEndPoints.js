@@ -15,6 +15,12 @@ const apiEndpoints = {
     // GET — download a single file
   DOWNLOAD_FILE: (fileId) => `${BASE_URL}/files/download/${fileId}`,
 
+  // get User credits
+  GET_CREDITS : `${BASE_URL}/users/credits`,
+
+  // upload files
+  UPLOAD_FILES : `${BASE_URL}/files/upload`,
+
 };
 
 export default apiEndpoints;

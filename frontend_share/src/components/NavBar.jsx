@@ -1,12 +1,19 @@
 import { UserButton } from '@clerk/clerk-react';
 import { Menu, Share2, Wallet, X } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import SideMenu from './SideMenu';
 import CreditsDisplay from './CreditsDisplay';
+import { UserCreditsContext } from '../context/UserCreditContext';
 
 const NavBar = ({activeMenu}) => {
   const [openSidemenu, setOpenSideMenu] = useState(false);
+  const {credits,fetchUserCredits} = useContext(UserCreditsContext);
+
+  useEffect(()=>{
+    fetchUserCredits();
+  },[fetchUserCredits]);
+
 
   return (
     <header className="sticky top-0 z-30 w-full border-b border-gray-200 bg-white/90 backdrop-blur-md shadow-sm">
@@ -41,7 +48,7 @@ const NavBar = ({activeMenu}) => {
             to="/subscriptions"
             className="p-2 rounded-lg hover:bg-gray-100 transition"
           >
-            <CreditsDisplay credits={5}/>
+            <CreditsDisplay credits={credits}/>
           </Link>
 
           <div className="relative">
