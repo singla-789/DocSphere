@@ -4,6 +4,7 @@ import com.Singla.DocSphereApi.DTO.FileMetaDataDto;
 import com.Singla.DocSphereApi.Document.FileMetaDataDocument;
 import com.Singla.DocSphereApi.Document.ProfileDocument;
 import com.Singla.DocSphereApi.Repository.FileMetaDataRepository;
+import com.Singla.DocSphereApi.Repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -27,6 +28,7 @@ public class FileMetaDataService {
     private final ProfileService profileService;
     private final UserCreditsService userCreditsService;
     private final FileMetaDataRepository fileMetaDataRepository;
+    private final ProfileRepository profileRepository;
 
     public List<FileMetaDataDto> uploadFiles(MultipartFile files[]) throws IOException {
         ProfileDocument currProfile = profileService.getCurrentProfile();
@@ -66,6 +68,9 @@ public class FileMetaDataService {
     }
 
     private FileMetaDataDto mapToDto(FileMetaDataDocument fileMetaDataDocument) {
+       ProfileDocument profile = profileRepository.findByClerkId(fileMetaDataDocument.getClerkId());
+       String ownerName = profile != null ? profile.getFirstName() + " " + profile.getLastName() : "Unknown User";
+
        return FileMetaDataDto.builder()
                 .id(fileMetaDataDocument.getId())
                 .fileLocation(fileMetaDataDocument.getFileLocation())
@@ -73,6 +78,7 @@ public class FileMetaDataService {
                 .size(fileMetaDataDocument.getSize())
                 .type(fileMetaDataDocument.getType())
                 .clerkId(fileMetaDataDocument.getClerkId())
+                .ownerName(ownerName)
                 .isPublic(fileMetaDataDocument.getIsPublic())
                 .uploadedAt(fileMetaDataDocument.getUploadedAt())
                 .build();

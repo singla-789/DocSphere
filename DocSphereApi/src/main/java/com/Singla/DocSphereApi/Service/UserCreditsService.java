@@ -46,6 +46,14 @@ public class UserCreditsService {
         return userCreditsRepository.save(userCredits);
     }
 
+    public UserCredits addCredits(String clerkId,Integer creditsToAdd,String plan){
+        UserCredits userCredits = userCreditsRepository.findByClerkId(clerkId)
+                .orElseGet(() -> createInitialCredits(clerkId));
+        userCredits.setCredits(userCredits.getCredits()+creditsToAdd);
+        userCredits.setPlan(plan);
+        return userCreditsRepository.save(userCredits);
+    }
+
     public boolean existsByClerkId(String clerkId) {
         return userCreditsRepository.existsByClerkId(clerkId);
     }

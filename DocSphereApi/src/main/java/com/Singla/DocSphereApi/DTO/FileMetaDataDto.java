@@ -20,4 +20,5 @@ public class FileMetaDataDto {
     private Boolean isPublic;
     private String fileLocation;
     private LocalDateTime uploadedAt;
+    private String ownerName;
 }

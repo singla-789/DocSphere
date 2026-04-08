@@ -7,6 +7,7 @@ import MyFiles from "./pages/MyFiles";
 import Upload from "./pages/Upload";
 import Subscription from "./pages/Subscription";
 import Transactions from "./pages/Transactions";
+import PublicFileView from "./pages/PublicFileView";
 import { RedirectToSignIn, SignedIn, SignedOut } from "@clerk/clerk-react";
 import { Toaster } from "react-hot-toast";
 import { UserCreditsProvider } from "./context/UserCreditContext";
@@ -18,6 +19,7 @@ const App = () => {
         <Toaster />
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/file/:id" element={<PublicFileView />} />
           <Route
             path="/dashboard"
             element={

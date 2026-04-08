@@ -65,6 +65,22 @@ public class FileController {
                 .body(resource);
     }
 
+    @GetMapping("/preview/{id}")
+    public ResponseEntity<Resource> preview(@PathVariable String id) throws IOException {
+        FileMetaDataDto file = fileMetaDataService.getPublicFile(id);
+        Resource resource = new UrlResource(file.getFileLocation());
+        String contentType = file.getType();
+        if (contentType == null) {
+            contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + file.getName() + "\"")
+                .body(resource);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteFile(@PathVariable String id){
         fileMetaDataService.deleteFile(id);

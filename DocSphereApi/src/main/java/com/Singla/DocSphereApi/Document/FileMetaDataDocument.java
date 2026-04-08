@@ -24,5 +24,6 @@ public class FileMetaDataDocument {
     private Boolean isPublic;
     private String fileLocation;
     private LocalDateTime uploadedAt;
+    private String publicId;
 
 }
