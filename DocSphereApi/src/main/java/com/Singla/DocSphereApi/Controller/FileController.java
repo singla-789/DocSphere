@@ -5,20 +5,15 @@ import com.Singla.DocSphereApi.Document.UserCredits;
 import com.Singla.DocSphereApi.Service.FileMetaDataService;
 import com.Singla.DocSphereApi.Service.UserCreditsService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,32 +48,29 @@ public class FileController {
 
 
     @GetMapping("/download/{id}")
-    public ResponseEntity<Resource> download(@PathVariable String id) throws IOException {
-
+    public ResponseEntity<org.springframework.core.io.InputStreamResource> download(@PathVariable String id) throws IOException {
         FileMetaDataDto downloadableFile = fileMetaDataService.getDownloadableFile(id);
-        Path path = Paths.get(downloadableFile.getFileLocation());
-        Resource resource = new UrlResource(path.toUri());
+
+        software.amazon.awssdk.core.ResponseInputStream<software.amazon.awssdk.services.s3.model.GetObjectResponse> s3Stream =
+                fileMetaDataService.downloadFile(id);
+
+        String contentType = downloadableFile.getType() != null ? downloadableFile.getType() : "application/octet-stream";
+        String fileName = downloadableFile.getName() != null ? downloadableFile.getName() : "download";
 
         return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""+downloadableFile.getName()+"\"")
-                .body(resource);
+                .header("Content-Type", contentType)
+                .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
+                .body(new org.springframework.core.io.InputStreamResource(s3Stream));
     }
 
     @GetMapping("/preview/{id}")
-    public ResponseEntity<Resource> preview(@PathVariable String id) throws IOException {
+    public ResponseEntity<?> preview(@PathVariable String id) throws IOException {
         FileMetaDataDto file = fileMetaDataService.getPublicFile(id);
-        Resource resource = new UrlResource(file.getFileLocation());
-        String contentType = file.getType();
-        if (contentType == null) {
-            contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
-        }
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=\"" + file.getName() + "\"")
-                .body(resource);
+        java.net.URI location = UriComponentsBuilder
+                .fromUriString(file.getFileLocation())
+                .build(true)
+                .toUri();
+        return ResponseEntity.status(302).location(location).build();
     }
 
     @DeleteMapping("/{id}")

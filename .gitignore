@@ -1,0 +1,27 @@
+# Environment secrets — NEVER commit
+.env
+.env.*
+!.env.example
+
+# Maven build output
+DocSphereApi/target/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# VS Code
+.vscode/
+
+# Node / frontend
+frontend_share/node_modules/
+frontend_share/dist/
+frontend_share/.env
+frontend_share/.env.*
+!frontend_share/.env.example
+
+# OS
+.DS_Store
+Thumbs.db

@@ -6,15 +6,21 @@ import com.Singla.DocSphereApi.Document.ProfileDocument;
 import com.Singla.DocSphereApi.Repository.FileMetaDataRepository;
 import com.Singla.DocSphereApi.Repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +28,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FileMetaDataService {
@@ -29,6 +36,13 @@ public class FileMetaDataService {
     private final UserCreditsService userCreditsService;
     private final FileMetaDataRepository fileMetaDataRepository;
     private final ProfileRepository profileRepository;
+    private final S3Client s3Client;
+
+    @Value("${supabase.s3.bucketName}")
+    private String bucketName;
+
+    @Value("${supabase.s3.endpointUrl}")
+    private String endpointUrl;
 
     public List<FileMetaDataDto> uploadFiles(MultipartFile files[]) throws IOException {
         ProfileDocument currProfile = profileService.getCurrentProfile();
@@ -38,21 +52,28 @@ public class FileMetaDataService {
             throw new RuntimeException("Not enough credits to upload files. Please purchase more credits");
         }
 
-        Path uploadPath = Paths.get("upload").toAbsolutePath().normalize();
-        Files.createDirectories(uploadPath);
-
         for(MultipartFile file : files){
-            String FileName = UUID.randomUUID()+"."+ StringUtils.getFilenameExtension(file.getOriginalFilename());
-            Path targetLocation = uploadPath.resolve(FileName);
-            Files.copy(file.getInputStream(),targetLocation, StandardCopyOption.REPLACE_EXISTING);
+            String fileKey = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+            PutObjectRequest putRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(fileKey)
+                    .contentType(file.getContentType())
+                    .build();
+
+            s3Client.putObject(putRequest, RequestBody.fromBytes(file.getBytes()));
+            log.info("Uploaded file to Supabase S3: {}", fileKey);
+
+            String fileUrl = buildPublicUrl(fileKey);
 
             FileMetaDataDocument fileMetadata = FileMetaDataDocument.builder()
-                    .fileLocation(targetLocation.toString())
+                    .fileLocation(fileUrl)
                     .name(file.getOriginalFilename())
                     .size(file.getSize())
                     .type(file.getContentType())
                     .clerkId(currProfile.getClerkId())
                     .isPublic(false)
+                    .publicId(fileKey)
                     .uploadedAt(LocalDateTime.now())
                     .build();
 
@@ -65,6 +86,15 @@ public class FileMetaDataService {
         return savedFiles.stream().map(fileMetaDataDocument -> mapToDto(fileMetaDataDocument))
                 .collect(Collectors.toList());
 
+    }
+
+    private String buildPublicUrl(String fileKey) {
+        // endpointUrl format: https://<PROJECT-ID>.supabase.co/storage/v1/s3
+        // public URL format:  https://<PROJECT-ID>.supabase.co/storage/v1/object/public/<BUCKET>/<FILE_KEY>
+        String baseUrl = endpointUrl.replace("/storage/v1/s3", "");
+        // Encode each path segment individually to handle spaces and special chars in filenames
+        String encodedKey = URLEncoder.encode(fileKey, StandardCharsets.UTF_8).replace("+", "%20");
+        return baseUrl + "/storage/v1/object/public/" + bucketName + "/" + encodedKey;
     }
 
     private FileMetaDataDto mapToDto(FileMetaDataDocument fileMetaDataDocument) {
@@ -106,25 +136,36 @@ public class FileMetaDataService {
         return mapToDto(file);
     }
 
+    public ResponseInputStream<GetObjectResponse> downloadFile(String id) {
+        FileMetaDataDocument file = fileMetaDataRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("File Not Found"));
+        GetObjectRequest getRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(file.getPublicId())
+                .build();
+        return s3Client.getObject(getRequest);
+    }
+
     public void deleteFile(String id) {
-        try {
-            ProfileDocument currentProfile = profileService.getCurrentProfile();
+        ProfileDocument currentProfile = profileService.getCurrentProfile();
 
-            FileMetaDataDocument file = fileMetaDataRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("File not found"));
+        FileMetaDataDocument file = fileMetaDataRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("File not found"));
 
-            if (!file.getClerkId().equals(currentProfile.getClerkId())) {
-                throw new RuntimeException("File is not belong to current user");
-            }
-
-            Path filePath = Paths.get(file.getFileLocation());
-            Files.deleteIfExists(filePath);
-
-            fileMetaDataRepository.deleteById(id);
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting the file");
+        if (!file.getClerkId().equals(currentProfile.getClerkId())) {
+            throw new RuntimeException("File is not belong to current user");
         }
+
+        if (file.getPublicId() != null) {
+            DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(file.getPublicId())
+                    .build();
+            s3Client.deleteObject(deleteRequest);
+            log.info("Deleted file from Supabase S3: {}", file.getPublicId());
+        }
+
+        fileMetaDataRepository.deleteById(id);
     }
 
     public FileMetaDataDto toggleFileData(String id){
